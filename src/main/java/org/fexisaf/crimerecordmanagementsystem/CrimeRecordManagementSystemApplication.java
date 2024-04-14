@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditAware")
 @EnableAspectJAutoProxy
-//@EnableScheduling
+@EnableScheduling
 public class CrimeRecordManagementSystemApplication {
 
 
