@@ -21,7 +21,7 @@ public class CrimeController {
     private final CrimeService crimeService;
 
     @PostMapping("/report-crime")
-    public ResponseEntity<?> crimeReport(@RequestPart("crimeModel") @Valid CrimeModel crimeModel,
+    public ResponseEntity<?> crimeReport(@RequestPart("data") @Valid CrimeModel crimeModel,
                                          @RequestParam(value = "image", required = false) MultipartFile imgFile,
                                          @RequestParam(value = "video", required = false) MultipartFile videoFile
                                          ) throws IOException {

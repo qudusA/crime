@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Entity
 @Data
@@ -48,5 +50,10 @@ public class ListOfPoliceStationEntity {
     @JoinColumn(name = "head_id")
     private UserEntity headOfPoliceStation;
 
+    @OneToMany(mappedBy = "policeStation", orphanRemoval = true)
+    private List<HeadOfDepartmentEntity> headOfDepartment;
+
+    @OneToMany(mappedBy = "listOfPoliceStation", orphanRemoval = true)
+    private List<PoliceWardenJudgeEntity> policeWardenJudge;
 }
 

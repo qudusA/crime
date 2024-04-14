@@ -22,7 +22,7 @@ public class ListOfCourtHouseEntity {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "listOfCourtHouses")
+    @OneToMany(mappedBy = "listOfCourtHouses", orphanRemoval = true)
     private List<PoliceWardenJudgeEntity> policeWardenJudgeEntities;
 
     @Column(name = "court_house_name", unique = true)

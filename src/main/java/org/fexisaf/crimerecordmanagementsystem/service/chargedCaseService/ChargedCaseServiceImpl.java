@@ -44,56 +44,22 @@ public class ChargedCaseServiceImpl implements ChargedCaseService{
                 .build();
     }
 
-//    @Override
-//    public Ok<?> giveVerdict(Long chargedCaseId, VerdictModel verdictModel) throws NotFoundException {
-//
-//       ChargedCaseEntity chargedCaseEntity = chargedCaseRepository.findById(chargedCaseId)
-//                .orElseThrow(()-> new NotFoundException("charged case not found..."));
-//
-////        PunishmentEntity punishment = PunishmentEntity.builder()
-////                .
-////                .build();
-//
-////        chargedCaseEntity.setCourtVerdict(verdictModel.getVerdict());
-//        chargedCaseRepository.save(chargedCaseEntity);
-//        return Ok.builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .statusName(HttpStatus.OK.name())
-//                .date(LocalDateTime.now())
-//                .message("verdict given successful...")
-//                .build();
-//    }
-//
-//    @Override
-//    public Ok<?> updateVerdict(Long chargedCaseId, PunishmentModel punishmentModel) throws NotFoundException {
-//        ChargedCaseEntity chargedCaseEntity = chargedCaseRepository.findById(chargedCaseId)
-//                .orElseThrow(()-> new NotFoundException("charged case not found..."));
-//
-////        chargedCaseEntity.setCourtVerdict(verdictModel.getVerdict());
-//        chargedCaseRepository.save(chargedCaseEntity);
-//        return Ok.builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .statusName(HttpStatus.OK.name())
-//                .date(LocalDateTime.now())
-//                .message("verdict given successful...")
-//                .build();
-//    }
 
 
-    @Override
-    public void assignJudgeToCase(ChargedCaseEntity event) {
-       var courtId = event.getListOfCourtHouseEntity();
-       var foundCourtHouse = listOfCourtHouseRepository.findByCourtHouseName(courtId.getCourtHouseName()).orElseThrow();
-        Random random = new Random();
-        int lowerBound = 1;
-        int Bound = foundCourtHouse.getNumbersOfCourtRooms() - lowerBound;
-       var countIndex = lowerBound + random.nextInt(Bound);
-       List<PoliceWardenJudgeEntity> policeWardenJudgeEntities  =
-              courtRepository.findAllByListOfCourtHouses(courtId);
-       var foundCourtRoom = policeWardenJudgeEntities.get(countIndex);
-      event.setPoliceWardenJudge(foundCourtRoom);
-      chargedCaseRepository.save(event);
-    }
+//    @Override
+//    public void assignJudgeToCase(ChargedCaseEntity event) {
+//       var courtId = event.getListOfCourtHouseEntity();
+//       var foundCourtHouse = listOfCourtHouseRepository.findByCourtHouseName(courtId.getCourtHouseName()).orElseThrow();
+//        Random random = new Random();
+//        int lowerBound = 1;
+//        int Bound = foundCourtHouse.getNumbersOfCourtRooms() - lowerBound;
+//       var countIndex = lowerBound + random.nextInt(Bound);
+//       List<PoliceWardenJudgeEntity> policeWardenJudgeEntities  =
+//              courtRepository.findAllByListOfCourtHouses(courtId);
+//       var foundCourtRoom = policeWardenJudgeEntities.get(countIndex);
+//      event.setPoliceWardenJudge(foundCourtRoom);
+//      chargedCaseRepository.save(event);
+//    }
 
 
     @Override

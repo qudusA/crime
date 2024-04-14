@@ -1,6 +1,10 @@
 package org.fexisaf.crimerecordmanagementsystem.service.policeService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.fexisaf.crimerecordmanagementsystem.controller.AuthenticationController;
 import org.fexisaf.crimerecordmanagementsystem.entity.*;
 import org.fexisaf.crimerecordmanagementsystem.model.ListOfDepartmentModel;
 import org.fexisaf.crimerecordmanagementsystem.model.ListOfPoliceStationModel;
@@ -8,6 +12,7 @@ import org.fexisaf.crimerecordmanagementsystem.repository.*;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.userService.UserServiceAuthentication;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,7 @@ public class PoliceServiceImpl implements PoliceService {
     private final UserRepository userRepository;
     private final UserServiceAuthentication userServiceAuthentication;
     private final CaseRepository caseRepository;
+    private final AuthenticationController authenticationController;
 
 
     private final ListOfPoliceStationRepository policeStationRepository;
@@ -37,38 +43,53 @@ public class PoliceServiceImpl implements PoliceService {
 
 
     @Override
+    @Transactional
     public Ok<?> createPoliceStation(ListOfPoliceStationModel policeStationModel,
-                                     Long id) throws NotFoundException {
-        var user = userRepository.findById(id)
-                .orElseThrow(()->new NotFoundException("user not found..."));
-if(!user.getRole().equals(Role.LAW_ENFORCEMENT_OFFICER))
-    throw new IllegalArgumentException("this user is not a police officer");
+                                     Long userId) throws Exception {
+        try {
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("User not found."));
+            if (!user.getRole().equals(Role.LAW_ENFORCEMENT_OFFICER))
+                throw new IllegalArgumentException("This user is not a police officer.");
 
-ListOfPoliceStationEntity policeStation = ListOfPoliceStationEntity
-                .builder()
-                .policeStationName(policeStationModel.getPoliceStationName())
-                .location(policeStationModel.getLocation())
-                .latitude(policeStationModel.getLatitude())
-                .longitude(policeStationModel.getLongitude())
-                .policeStationMaxStaffCapacity(policeStationModel.getPoliceStationMaxStaffCapacity())
-                .currentCapacity(policeStationModel.getCurrentCapacity())
-                .headOfPoliceStation(user)
-                .build();
-        policeStationRepository.save(policeStation);
+            ListOfPoliceStationEntity policeStation = ListOfPoliceStationEntity
+                    .builder()
+                    .policeStationName(policeStationModel.getPoliceStationName())
+                    .location(policeStationModel.getLocation())
+                    .latitude(policeStationModel.getLatitude())
+                    .longitude(policeStationModel.getLongitude())
+                    .policeStationMaxStaffCapacity(policeStationModel.getPoliceStationMaxStaffCapacity())
+                    .currentCapacity(policeStationModel.getCurrentCapacity())
+                    .headOfPoliceStation(user)
+                    .build();
+            policeStationRepository.save(policeStation);
 
+            var rank = rankRepository.findByRank("Superintendent of Police (SP)").orElseThrow();
+            var dept = departmentRepository.findByDepartment("Operations department").orElseThrow();
 
-       var rank = rankRepository.findByRank("Superintendent of Police (SP)").orElseThrow();
-       var dept = departmentRepository.findByDepartment("Operations department").orElseThrow();
-
-        police(rank.getRank(), policeStation.getPoliceStationName(), user, dept.getId());
-
-        return Ok.builder()
-                .message("police station creation successfull...")
-                .statusName(HttpStatus.CREATED.name())
-                .statusCode(HttpStatus.CREATED.value())
-                .date(LocalDateTime.now())
-                .build();
+            police(rank.getRank(), policeStation.getPoliceStationName(), user, dept.getId());
+            appointHeadOfDepartment(userId, dept.getId());
+            return Ok.builder()
+                    .message("Police station creation successful.")
+                    .statusName(HttpStatus.CREATED.name())
+                    .statusCode(HttpStatus.CREATED.value())
+                    .date(LocalDateTime.now())
+                    .build();
+        } catch (NotFoundException e){
+            throw new NotFoundException(e.getMessage());
+        } catch (ExpiredJwtException e){
+            System.out.println("herer   e   e");
+            return Ok.builder()
+                    .message("Session expired. Please log in again.")
+                    .statusName(HttpStatus.UNAUTHORIZED.name())
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .date(LocalDateTime.now())
+                    .build();
+        } catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
+
 
 
     @Override

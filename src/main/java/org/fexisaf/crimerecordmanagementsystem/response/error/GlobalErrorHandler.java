@@ -2,6 +2,7 @@ package org.fexisaf.crimerecordmanagementsystem.response.error;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.twilio.exception.ApiException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.validation.UnexpectedTypeException;
@@ -112,6 +113,18 @@ public class GlobalErrorHandler {
 
     @ExceptionHandler( BadCredentialsException.class)
     public ResponseEntity<?> amazonS3Exception( BadCredentialsException e){
+        ErrorResponse errorResponse = getErrorResponse(e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+//    @ExceptionHandler( RuntimeException.class)
+//    public ResponseEntity<?> runTimeException( RuntimeException e){
+//        ErrorResponse errorResponse = getErrorResponse(e.getMessage());
+//        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+//    }
+
+    @ExceptionHandler( ExpiredJwtException.class)
+    public ResponseEntity<?> expiredJwtException( ExpiredJwtException e){
         ErrorResponse errorResponse = getErrorResponse(e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }

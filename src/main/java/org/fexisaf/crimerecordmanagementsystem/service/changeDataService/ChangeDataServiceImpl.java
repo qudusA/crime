@@ -7,6 +7,7 @@ import com.twilio.type.PhoneNumber;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.fexisaf.crimerecordmanagementsystem.config.SmsConfig;
+import org.fexisaf.crimerecordmanagementsystem.entity.Role;
 import org.fexisaf.crimerecordmanagementsystem.entity.TokenEntity;
 import org.fexisaf.crimerecordmanagementsystem.entity.UserEntity;
 import org.fexisaf.crimerecordmanagementsystem.model.ChangePasswordModel;
@@ -113,6 +114,23 @@ public class ChangeDataServiceImpl implements ChangeDataService {
         }catch (NotFoundException e){
             throw new NotFoundException(e.getMessage());
         }
+    }
+
+    @Override
+    public Ok<?> changeUserRole(Role role, String email) throws NotFoundException {
+
+       var user = userRepository.findByEmail(email)
+               .orElseThrow(()-> new NotFoundException("user not found..."));
+
+       user.setRole(role);
+       userRepository.save(user);
+
+        return Ok.builder()
+                .message("role change successful...")
+                .date(LocalDateTime.now())
+                .statusName(HttpStatus.OK.name())
+                .statusCode(HttpStatus.OK.value())
+                .build();
     }
 //
 //    @Override

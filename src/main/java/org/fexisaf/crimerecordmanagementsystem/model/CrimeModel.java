@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@Builder
+//@Builder
 public class CrimeModel {
 
     @NotNull(message = "you have to describe the incident")

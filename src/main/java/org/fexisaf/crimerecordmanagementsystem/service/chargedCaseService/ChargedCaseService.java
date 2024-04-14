@@ -6,7 +6,7 @@ import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 
 public interface ChargedCaseService {
 
-    void assignJudgeToCase(ChargedCaseEntity event);
+//    void assignJudgeToCase(ChargedCaseEntity event);
 
     Ok<?> createChargedCase(Long caseId, String CourtHouse) throws NotFoundException;
 

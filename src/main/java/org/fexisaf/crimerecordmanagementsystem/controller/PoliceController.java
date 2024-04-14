@@ -26,7 +26,7 @@ public class PoliceController {
     public ResponseEntity<?> createPoliceStation(
             @RequestBody @Valid ListOfPoliceStationModel stationModel
             ,@PathVariable("userId") Long id
-            ) throws NotFoundException {
+            ) throws Exception {
         Ok<?> res = policeStationService.createPoliceStation(stationModel, id);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);

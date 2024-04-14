@@ -32,10 +32,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -58,12 +61,14 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
 
 
     @Override
+//    @Transactional
     public Ok<?> signUp(SignUpModel signUpModel, HttpServletRequest request) {
         try {
                 Authentication authentication = SecurityContextHolder.getContext()
                         .getAuthentication();
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//            LocalDate date = LocalDate.parse(signUpModel.getDateOfBirth(), formatter);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String date =String.valueOf(LocalDate.
+                    parse(signUpModel.getDateOfBirth(), formatter));
 
             String firstName = capitalizeName(signUpModel.getFirstName());
             String lastName = capitalizeName(signUpModel.getLastName());
@@ -75,20 +80,25 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
             }else if (!(authentication instanceof AnonymousAuthenticationToken) && !((UserEntity)authentication.getPrincipal()).getRole().equals(Role.ADMIN)) {
                 throw new IllegalArgumentException("Only ADMIN users can perform this action.");
             }
+
+            String phoneNumber = signUpModel.getPhoneNumber().startsWith("+")
+            ? signUpModel.getPhoneNumber() : "+234".concat(signUpModel.getPhoneNumber().substring(1));
+
             UserEntity user = UserEntity.builder()
                     .email(signUpModel.getEmail())
                     .password(passwordEncoder.encode(signUpModel.getPassword()))
                     .firstName(firstName)
                     .lastName(lastName)
-                    .dateOfBirth(signUpModel.getDateOfBirth())
-                    .phoneNumber(signUpModel.getPhoneNumber())
+                    .dateOfBirth(date)
+                    .phoneNumber(phoneNumber)
                     .role(signUpModel.getRole())
+                    .address(signUpModel.getAddress())
                     .build();
             var userRes = userRepository.save(user);
             System.out.println(userRes);
             var tokenEntity =  getTokenEntity(user);
             tokenRepository.save(tokenEntity);
-//            TODO uncomment latter
+
             publisher.publishEvent(new EventObj(tokenEntity, getServer(request)));
 
             return Ok.builder()

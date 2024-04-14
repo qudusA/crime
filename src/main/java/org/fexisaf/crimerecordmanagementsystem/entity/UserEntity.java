@@ -31,12 +31,12 @@ public class UserEntity implements UserDetails {
 
     @ToString.Exclude
     @JsonIgnore
-    @OneToMany(mappedBy = "userEntity")
+    @OneToMany(mappedBy = "userEntity", orphanRemoval = true)
     private List<TokenEntity> tokenEntities;
 
     @ToString.Exclude
     @JsonIgnore
-    @OneToMany(mappedBy = "investigatingOfficer")
+    @OneToMany(mappedBy = "investigatingOfficer", orphanRemoval = true)
     private List<CrimeEntity> crimeEntities;
 
 
@@ -76,9 +76,9 @@ public class UserEntity implements UserDetails {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-//    @NotNull(message = "email is required")
-////    @NotBlank(message = "email cannot be blank")
-//    @Column(name = "home_address")
+    @NotNull(message = "home address is required")
+    @NotBlank(message = "home address cannot be blank")
+    @Column(name = "home_address")
     private String address;
 
 

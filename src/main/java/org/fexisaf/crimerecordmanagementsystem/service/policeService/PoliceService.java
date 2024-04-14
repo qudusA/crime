@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 
 public interface PoliceService {
 
-    Ok<?> createPoliceStation(ListOfPoliceStationModel policeStationModel,Long id) throws NotFoundException;
+    Ok<?> createPoliceStation(ListOfPoliceStationModel policeStationModel,Long id) throws Exception;
 
     Ok<?> createPoliceRank(PoliceRanksEntity rank) throws Exception;
 

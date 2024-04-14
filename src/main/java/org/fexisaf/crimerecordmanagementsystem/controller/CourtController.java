@@ -66,6 +66,15 @@ public class CourtController {
     }
 
 
+// TODO assign case to judge
 
+    @PostMapping("/assign-case-to-judge/{roomId}/{caseId}")
+    public ResponseEntity<?> assignCaseToJudge(@PathVariable Long roomId,
+                                               @PathVariable Long caseId) throws NotFoundException {
+        Ok<?> res = courtService.assignCaseToJudge(roomId, caseId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+
+    }
 
 }

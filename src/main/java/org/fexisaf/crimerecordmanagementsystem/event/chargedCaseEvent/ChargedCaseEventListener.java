@@ -11,6 +11,6 @@ public class ChargedCaseEventListener implements ApplicationListener<ChargedCase
 
     @Override
     public void onApplicationEvent(ChargedCaseEvent event) {
-        chargedCaseService.assignJudgeToCase(event.getChargedCaseEntity());
+//        chargedCaseService.assignJudgeToCase(event.getChargedCaseEntity());
     }
 }

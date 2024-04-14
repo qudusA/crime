@@ -32,10 +32,12 @@ public class PrisonServiceImpl implements PrisonService{
     private final HeadOfPrisonDepartmentRepository headOfPrisonDepartmentRepository;
 
     @Override
+    @Transactional
     public Ok<?> createPrisonFacility(ListOfPrisonModel stationModel, Long userId) throws Exception {
-
+        try {
         var foundUser = userRepository.findById(userId)
                 .orElseThrow(()-> new NotFoundException("user not found..."));
+
 
         ListOfPrisonFacility prisonFacility = ListOfPrisonFacility
                 .builder()
@@ -50,13 +52,13 @@ public class PrisonServiceImpl implements PrisonService{
                 .headOfPrison(foundUser)
                 .build();
 
-        try {
+
             listOfPrisonFacility.save(prisonFacility);
 
-            var rank = prisonWardenRankRepository.findByRank("Superintendent of Police (SP)").orElseThrow();
-            var dept = listOfPrisonDepartmentRepository.findByDepartment("Operations department").orElseThrow();
+            var rank = prisonWardenRankRepository.findByRank("Superintendent of Prison").orElseThrow(()-> new NotFoundException("prison rank not found..."));
+//            var dept = listOfPrisonDepartmentRepository.findByDepartment("Operations department").orElseThrow();
 
-            warden(rank.getRank(), prisonFacility.getPrisonFacilityName(), foundUser, dept.getId());
+            warden(rank.getRank(), prisonFacility.getPrisonFacilityName(), foundUser,null);
 
             return Ok.builder()
                 .message("prison facility creation successfully...")
@@ -64,7 +66,9 @@ public class PrisonServiceImpl implements PrisonService{
                 .statusCode(HttpStatus.CREATED.value())
                 .date(LocalDateTime.now())
                 .build();
-        }catch (Exception e){
+        } catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        } catch (Exception e){
             throw new Exception(e.getMessage());
         }
 
@@ -202,8 +206,11 @@ public class PrisonServiceImpl implements PrisonService{
                 .orElseThrow(() -> new NotFoundException("rank not found ....W"));
         var foundFacility = listOfPrisonFacility.findByPrisonFacilityName(station)
                 .orElseThrow(() -> new NotFoundException("prison facility not found..."));
-        var department = listOfPrisonDepartmentRepository.findById(deptId)
-                .orElseThrow(()-> new NotFoundException("department not found..."));
+        ListOfPrisonDepartmentEntity department = null;
+        if(deptId != null) {
+            department = listOfPrisonDepartmentRepository.findById(deptId)
+                    .orElseThrow(() -> new NotFoundException("department not found..."));
+        }
         var currentCapacity = foundFacility.getCurrentInmateCapacity() + 1;
         if (currentCapacity > 100)
             throw new IllegalArgumentException("the station has reached it max staff capacity");

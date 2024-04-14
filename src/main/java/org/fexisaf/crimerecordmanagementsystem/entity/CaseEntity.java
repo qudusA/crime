@@ -25,7 +25,7 @@ public class CaseEntity {
 //     if offence is not null then crime can be null and vice versa
     @JsonIgnore
     @ToString.Exclude
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "crime_id")
     private ComplainEntity complain;
 

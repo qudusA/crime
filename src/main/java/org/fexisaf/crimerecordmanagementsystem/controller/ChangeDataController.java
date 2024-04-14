@@ -2,15 +2,13 @@ package org.fexisaf.crimerecordmanagementsystem.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.fexisaf.crimerecordmanagementsystem.entity.Role;
 import org.fexisaf.crimerecordmanagementsystem.model.ChangePasswordModel;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.changeDataService.ChangeDataService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -39,5 +37,13 @@ public class ChangeDataController {
         return ResponseEntity.ok(res);
     }
 
+    @PutMapping("/change-user-role")
+        public ResponseEntity<?> changeUserRole(@RequestParam("role") Role role,
+                                                @RequestParam String email) throws NotFoundException {
+
+        Ok<?> res = changeDatService.changeUserRole(role, email );
+
+        return ResponseEntity.ok(res);
+        }
 
 }

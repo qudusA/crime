@@ -59,6 +59,12 @@ public class SignUpModel {
     @Builder.Default
     private Role role = Role.USER;
 
+
+    @NotNull(message = "home address is required")
+    @NotBlank(message = "home address cannot be blank")
+    @Column(name = "home_address")
+    private String address;
+
 //    @NotContains(forbiddenOccupation = {"judge", "warder", "police"}, adminOnly = true)
 //    @NotNull(message = "occupation cannot be null...")
 //    @NotBlank(message = "blank")

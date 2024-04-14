@@ -81,11 +81,13 @@ public class CrimeServiceImpl implements CrimeService {
     private Ok<?> saveCrimeReport(CrimeModel crimeModel,
                                  String imagePath,
                                  String videoPath) {
-UserEntity foundUser = (UserEntity) SecurityContextHolder.getContext()
+UserEntity contextUser = (UserEntity) SecurityContextHolder.getContext()
         .getAuthentication().getPrincipal();
 
-       if(!(foundUser.getRole() == Role.LAW_ENFORCEMENT_OFFICER))
+UserEntity foundUser = investigator.findByEmail(contextUser.getEmail()).orElseThrow();
+       if(foundUser.getRole() != Role.LAW_ENFORCEMENT_OFFICER) {
            throw new IllegalArgumentException("you cannot perform this action...");
+       }
        if (crimeModel.getDescription() == null ||
                 crimeModel.getDescription().isBlank()) {
             throw new IllegalArgumentException("description cannot be empty...");
@@ -118,7 +120,6 @@ UserEntity foundUser = (UserEntity) SecurityContextHolder.getContext()
 
     @Override
         public Ok<?> getCrimeById(Long crimeId) throws IOException {
-            //       TODO correct it this all data is been fetch instead of the crime data only
             CrimeEntity crime = crimeRepository.findById(crimeId)
                     .orElseThrow(()->new NotFoundException("crime not found..."));
 

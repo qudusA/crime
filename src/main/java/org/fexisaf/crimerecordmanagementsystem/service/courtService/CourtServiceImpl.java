@@ -3,14 +3,13 @@ package org.fexisaf.crimerecordmanagementsystem.service.courtService;
 import lombok.RequiredArgsConstructor;
 import org.fexisaf.crimerecordmanagementsystem.entity.*;
 import org.fexisaf.crimerecordmanagementsystem.model.ListOfCourtHouseModel;
-import org.fexisaf.crimerecordmanagementsystem.repository.CourtRepository;
-import org.fexisaf.crimerecordmanagementsystem.repository.ListOfCourtHouseRepository;
-import org.fexisaf.crimerecordmanagementsystem.repository.ListOfCourtRoomsRepository;
+import org.fexisaf.crimerecordmanagementsystem.repository.*;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.userService.UserServiceAuthentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,8 @@ public class CourtServiceImpl implements CourtService{
     private final ListOfCourtRoomsRepository listOfCourtRoomsRepository;
     private final UserServiceAuthentication userServiceAuthentication;
     private final CourtRepository courtRepository;
-
+    private final ChargedCaseRepository chargedCaseRepository;
+    private final AssignCaseToCourtRepository assignCaseToCourtRepository;
 
 
     @Override
@@ -101,6 +101,33 @@ public class CourtServiceImpl implements CourtService{
                 .statusName(HttpStatus.CREATED.name())
                 .statusCode(HttpStatus.CREATED.value())
                 .date(LocalDateTime.now())
+                .build();
+    }
+
+    @Override
+    public Ok<?> assignCaseToJudge(Long roomId, Long caseId) throws NotFoundException {
+
+        UserEntity user =(UserEntity) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        if(user.getRole() != Role.JUDGE)
+            throw new IllegalArgumentException("you cant perform this action...");
+       var courtRoom = listOfCourtRoomsRepository.findById(roomId)
+                .orElseThrow(()-> new NotFoundException("room not found..."));
+
+        var chargedCase = chargedCaseRepository.findById(caseId)
+                .orElseThrow(()-> new NotFoundException("case not found..."));
+
+        var caseAssigned = CaseAssignedToJudge.builder()
+                .caseEntity(chargedCase)
+                .RoomId(courtRoom)
+                .build();
+        assignCaseToCourtRepository.save(caseAssigned);
+
+        return Ok.builder()
+                .date(LocalDateTime.now())
+                .message("case assigned to room "+courtRoom.getRoomNumber())
+                .statusName(HttpStatus.CREATED.name())
+                .statusCode(HttpStatus.CREATED.value())
                 .build();
     }
 

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 
 
 @Entity
@@ -26,5 +27,6 @@ public class PoliceRanksEntity {
     @NotBlank(message = "this field is required..")
     private String rank;
 
-//    TODO oneToMany
+    @OneToMany(mappedBy = "policeRanks", orphanRemoval = true)
+    private List<PoliceWardenJudgeEntity> policeWardenJudge;
 }

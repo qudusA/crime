@@ -24,7 +24,7 @@ public class CrimeEntity {
     @Column(name = "crime_id")
     private Long crimeId;
 
-    @OneToMany(mappedBy = "crimeEntities")
+    @OneToMany(mappedBy = "crimeEntities", orphanRemoval = true)
     private List<CriminalEntity> criminalEntities;
 
     @Column(name = "crime_description")

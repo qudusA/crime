@@ -15,4 +15,6 @@ public interface CourtService {
     Ok<?> createOccupation(String email, String courtHouse, Role occupation, Authentication connectedUser, Long roomId) throws NotFoundException;
 
     Ok<?> findAllCourtHouse();
+
+    Ok<?> assignCaseToJudge(Long roomId, Long caseId) throws NotFoundException;
 }

@@ -27,7 +27,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(res);
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<Ok<?>> login(@RequestBody LoginModel loginModel) throws NotFoundException {
         Ok<?> res = authService.login(loginModel);

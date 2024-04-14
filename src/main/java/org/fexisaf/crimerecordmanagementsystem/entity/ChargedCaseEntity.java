@@ -20,20 +20,20 @@ public class ChargedCaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chargedCaseId;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "case_id")
     private CaseEntity caseEntity;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "court_house_id")
     private ListOfCourtHouseEntity listOfCourtHouseEntity;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "court_room_id")
-    private PoliceWardenJudgeEntity policeWardenJudge;
+//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+//    @JoinColumn(name = "court_room_id")
+//    private PoliceWardenJudgeEntity policeWardenJudge;
 
 
-    @OneToMany(mappedBy = "chargedCaseId")
+    @OneToMany(mappedBy = "chargedCaseId", orphanRemoval = true)
     private List<PunishmentEntity> punishmentEntities;
 
 }

@@ -26,6 +26,13 @@ public class ListOfPrisonFacility {
     @OneToMany(mappedBy = "listOFPrisonFacility")
     private List<PoliceWardenJudgeEntity> policeWardenJudgeEntities;
 
+
+    @OneToMany(mappedBy = "prisonFacility", orphanRemoval = true)
+    private List<HeadOfPrisonDepartmentEntity> headOfPrisonDepartmentEntities;
+
+    @OneToMany(mappedBy = "listOFPrisonFacility", orphanRemoval = true)
+    private List<PoliceWardenJudgeEntity> policeWardenJudge;
+
 //    @OneToMany(mappedBy = "prisonFacility")
 //    private List<InmateEntity> inmateEntities;
 

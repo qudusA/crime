@@ -1,14 +1,15 @@
 package org.fexisaf.crimerecordmanagementsystem.service.punishmentService;
 
 import lombok.RequiredArgsConstructor;
-import org.fexisaf.crimerecordmanagementsystem.entity.ChargedCaseEntity;
-import org.fexisaf.crimerecordmanagementsystem.entity.PunishmentEntity;
+import org.fexisaf.crimerecordmanagementsystem.entity.*;
 import org.fexisaf.crimerecordmanagementsystem.model.PunishmentModel;
-import org.fexisaf.crimerecordmanagementsystem.repository.ChargedCaseRepository;
+import org.fexisaf.crimerecordmanagementsystem.repository.AssignCaseToCourtRepository;
+import org.fexisaf.crimerecordmanagementsystem.repository.CourtRepository;
 import org.fexisaf.crimerecordmanagementsystem.repository.PunishmentRepository;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,13 +22,25 @@ import java.util.List;
 public class PunishmentServiceImpl implements PunishmentService{
 
     private final PunishmentRepository punishmentRepository;
-    private final ChargedCaseRepository chargedCaseRepository;
+    private final AssignCaseToCourtRepository assignCaseToCourtRepository;
+    private final CourtRepository courtRepository;
 
     @Override
-    public Ok<?> savePunishment(PunishmentModel punishmentModel, Long chargedCaseId) throws Exception {
+    public Ok<?> savePunishment(PunishmentModel punishmentModel,
+                                Long chargedCaseId) throws Exception {
        try {
-           ChargedCaseEntity chargedCase = chargedCaseRepository.findById(chargedCaseId)
+           CaseAssignedToJudge chargedCase = assignCaseToCourtRepository.findById(chargedCaseId)
                    .orElseThrow(() -> new NotFoundException("criminal not found..."));
+
+           UserEntity loggedInUser = (UserEntity) SecurityContextHolder
+                   .getContext().getAuthentication().getPrincipal();
+
+           PoliceWardenJudgeEntity policeWardenJudge = courtRepository.findByUserEntity(loggedInUser.getId())
+                   .orElseThrow(() -> new NotFoundException("user not found..."));
+
+           if(!policeWardenJudge.getCourtRoomId().equals(chargedCase.getRoomId()))
+               throw new IllegalArgumentException("you are not the assigned judge");
+
            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
            var startDate = LocalDate.parse(punishmentModel.getStartDate(), formatter);
            var endDate = LocalDate.parse(punishmentModel.getEndDate(), formatter);
@@ -42,7 +55,7 @@ public class PunishmentServiceImpl implements PunishmentService{
                         throw new IllegalArgumentException("fined amount is required cr...");
                     }
                      punishmentEntity = PunishmentEntity.builder()
-                            .chargedCaseId(chargedCase)
+                            .chargedCaseId(chargedCase.getCaseEntity())
                             .punishmentType("fine")
                             .punishmentDescription(punishmentModel.getPunishmentDescription())
                             .amountPaid(0)
@@ -53,7 +66,7 @@ public class PunishmentServiceImpl implements PunishmentService{
                 }
                 case "imprisonment" -> {
                      punishmentEntity = PunishmentEntity.builder()
-                            .chargedCaseId(chargedCase)
+                            .chargedCaseId(chargedCase.getCaseEntity())
                             .punishmentType("imprisonment")
                             .punishmentDescription(punishmentModel.getPunishmentDescription())
                             .startDate(startDate)
@@ -62,7 +75,7 @@ public class PunishmentServiceImpl implements PunishmentService{
                 }
                 case "community service" -> {
                     punishmentEntity = PunishmentEntity.builder()
-                            .chargedCaseId(chargedCase)
+                            .chargedCaseId(chargedCase.getCaseEntity())
                             .punishmentType("community service")
                             .punishmentDescription(punishmentModel.getPunishmentDescription())
                             .startDate(startDate)
@@ -105,6 +118,13 @@ public class PunishmentServiceImpl implements PunishmentService{
     public Ok<?> deleteById(Long punishmentId) throws Exception {
         try {
 
+            UserEntity loggedInUser = (UserEntity) SecurityContextHolder
+                    .getContext().getAuthentication().getPrincipal();
+           var punishment = punishmentRepository.findById(punishmentId)
+                   .orElseThrow(()-> new NotFoundException("punishment not found..."));
+           if(!punishment.getCreatedBy().equals(loggedInUser.getId()))
+               throw new IllegalArgumentException("you did not give the punishment");
+
             punishmentRepository.deleteById(punishmentId);
 
             return Ok.builder()
@@ -124,14 +144,21 @@ public class PunishmentServiceImpl implements PunishmentService{
         PunishmentEntity foundPunishment = punishmentRepository.findById(punishmentId)
                 .orElseThrow(()-> new NotFoundException("punishment not found..."));
 
-        if( foundPunishment.getPunishmentDescription() != null && !foundPunishment.getPunishmentDescription().isBlank()){
+        UserEntity loggedInUser = (UserEntity) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        if(!foundPunishment.getCreatedBy().equals(loggedInUser.getId()))
+            throw new IllegalArgumentException("you did not give the punishment");
 
-            foundPunishment.setPunishmentDescription(foundPunishment.getPunishmentDescription());
+        if( punishmentModel.getPunishmentDescription() != null && !punishmentModel.getPunishmentDescription().isBlank()){
+
+            foundPunishment.setPunishmentDescription(punishmentModel.getPunishmentDescription());
         }
 
-        if( foundPunishment.getPunishmentType() != null && !foundPunishment.getPunishmentType().isBlank() ){
+        if( punishmentModel.getPunishmentType() != null && !punishmentModel.getPunishmentType().isBlank() ){
 
-            punishmentModel.setPunishmentType(punishmentModel.getPunishmentType());
+            foundPunishment.setPunishmentType(punishmentModel.getPunishmentType());
+            foundPunishment.setFineAmount(0);
+
         }
 
         if(punishmentModel.getAmountPaid() != null ){

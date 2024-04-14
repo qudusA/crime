@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -20,4 +22,6 @@ public class WardenRanksEntity {
     @Column(name = "rank", unique = true)
     private String rank;
 
+    @OneToMany(mappedBy = "wardenRanks", orphanRemoval = true)
+    private List<PoliceWardenJudgeEntity> policeWardenJudge;
 }
