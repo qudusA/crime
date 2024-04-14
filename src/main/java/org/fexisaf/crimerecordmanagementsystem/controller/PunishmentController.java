@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN','CLARK')")
+@PreAuthorize("hasAnyRole('ADMIN','JUDGE')")
 public class PunishmentController {
 
     private final PunishmentService punishmentService;
@@ -22,7 +22,7 @@ public class PunishmentController {
 //     verify if the punishment has been completed i.e comunity service ;
 
 
-    @PreAuthorize("hasAnyAuthority('admin:create', 'clark:create')")
+    @PreAuthorize("hasAnyAuthority('admin:create', 'judge:create')")
     @PostMapping("/save-punishment/{chargedCaseId}")
     public ResponseEntity<?> savePunishment(@RequestBody PunishmentModel punishmentModel,
                                             @PathVariable Long chargedCaseId) throws Exception {
@@ -30,7 +30,7 @@ public class PunishmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin:read', 'clark:read')")
+    @PreAuthorize("hasAnyAuthority('admin:read', 'judge:read')")
     @GetMapping("/find-all-by-punishment-type/{type}")
     public ResponseEntity<?> findByPunishmentType(@PathVariable String type) throws NotFoundException {
 
@@ -39,7 +39,7 @@ public class PunishmentController {
         return ResponseEntity.ok(res);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin:delete', 'clark:delete')")
+    @PreAuthorize("hasAnyAuthority('admin:delete', 'judge:delete')")
     @DeleteMapping("/expunge-punishment/{punishmentId}")
     public ResponseEntity<?> deleteById(@PathVariable Long punishmentId) throws Exception {
 
@@ -48,7 +48,7 @@ public class PunishmentController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin:update', 'clark:update')")
+    @PreAuthorize("hasAnyAuthority('admin:update', 'judge:update')")
     @PutMapping("/change-punishment/{punishmentId}")
     public ResponseEntity<?> updateCrimeById(@PathVariable Long punishmentId,
                                              @RequestBody PunishmentModel punishmentModel) throws Exception {

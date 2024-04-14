@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Getter
+//@Getter
 public enum Role {
 
     USER(Collections.emptySet()),
@@ -29,7 +29,15 @@ public enum Role {
                     Permission.MANAGER_READ,
                     Permission.MANAGER_CREATE,
                     Permission.MANAGER_UPDATE,
-                    Permission.MANAGER_DELETE
+                    Permission.MANAGER_DELETE,
+                    Permission.WARDEN_READ,
+                    Permission.WARDEN_CREATE,
+                    Permission.WARDEN_UPDATE,
+                    Permission.WARDEN_DELETE,
+                    Permission.JUDGE_READ,
+                    Permission.JUDGE_CREATE,
+                    Permission.JUDGE_UPDATE,
+                    Permission.JUDGE_DELETE
             )
     ),
 
@@ -63,11 +71,21 @@ public enum Role {
     ),
 
     WARDEN(
-            Collections.emptySet()
+            Set.of(
+            Permission.WARDEN_READ,
+            Permission.WARDEN_CREATE,
+            Permission.WARDEN_UPDATE,
+            Permission.WARDEN_DELETE
+            )
     ),
 
     JUDGE(
-            Collections.emptySet()
+            Set.of(
+            Permission.JUDGE_READ,
+            Permission.JUDGE_CREATE,
+            Permission.JUDGE_UPDATE,
+            Permission.JUDGE_DELETE
+        )
     )
 
 

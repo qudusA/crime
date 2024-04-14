@@ -13,16 +13,19 @@ import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.policeService.PoliceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('LAW_ENFORCEMENT_OFFICER','ADMIN')")
 public class PoliceController {
 
     private final PoliceService policeStationService;
 
     @PostMapping("/create-police-station/{userId}")
+    @PreAuthorize("hasAuthority('admin:create')")
     public ResponseEntity<?> createPoliceStation(
             @RequestBody @Valid ListOfPoliceStationModel stationModel
             ,@PathVariable("userId") Long id
@@ -34,12 +37,14 @@ public class PoliceController {
     }
 
     @PostMapping("/create-police-rank")
+    @PreAuthorize("hasAuthority('admin:create')")
     public ResponseEntity<?> createPoliceRanks(@RequestBody @Valid PoliceRanksEntity rank) throws Exception {
         Ok<?> res = policeStationService.createPoliceRank(rank);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
     @PostMapping("/create-police-department")
+    @PreAuthorize("hasAuthority('admin:create')")
     public ResponseEntity<?> createPoliceDepartment(
             @RequestBody @Valid ListOfDepartmentModel departmentEntity
     ) throws Exception {
@@ -50,6 +55,7 @@ public class PoliceController {
     }
 
     @PutMapping("/update-police-department/{deptId}")
+    @PreAuthorize("hasAuthority('admin:update')")
     public ResponseEntity<?> updateDepartment(
             @RequestBody(required = false) @Valid ListOfDepartmentModel departmentEntity
             ,@PathVariable("deptId") Long id) throws Exception {
@@ -59,6 +65,7 @@ public class PoliceController {
 
 
     @PostMapping("/create-police-occupation/{deptId}")
+    @PreAuthorize("hasAuthority('admin:create')")
     public ResponseEntity<?> createOccupation(@RequestParam("email") String email,
                                               @RequestParam("rank") String rank,
                                               @RequestParam("station") String station,
@@ -96,6 +103,7 @@ public class PoliceController {
 
 
     @PostMapping("/createSuspect/{caseId}")
+    @PreAuthorize("hasAuthority('police:create')")
     public ResponseEntity<?> createSuspect(@PathVariable Long caseId,
                                            @RequestBody @Valid SuspectEntity suspectEntity) throws Exception {
         Ok<?> res = policeStationService.createSuspect(caseId, suspectEntity);

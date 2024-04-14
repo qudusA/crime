@@ -6,10 +6,12 @@ import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.chargedCaseService.ChargedCaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('LAW_ENFORCEMENT_OFFICER','ADMIN')")
 public class ChargedCaseController {
     private final ChargedCaseService chargedCaseService;
 
