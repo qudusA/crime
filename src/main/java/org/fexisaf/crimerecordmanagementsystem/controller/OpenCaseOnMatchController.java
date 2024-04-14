@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('JUDGE','ADMIN')")
+@PreAuthorize("hasAnyRole('CLARK','ADMIN')")
 public class OpenCaseOnMatchController {
 
     private final OpenCaseOnMatchService openCaseOnMatchService;
