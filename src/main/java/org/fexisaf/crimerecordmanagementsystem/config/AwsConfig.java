@@ -15,7 +15,7 @@ public class AwsConfig {
     @Value("${aws.secret-access-key}")
     private String secretAccessKey;
 
-    @Value("${asw.access-key-id}")
+    @Value("${aws.access-key-id}")
     private String accessKeyId;
 
     @Value("${aws.region}")
