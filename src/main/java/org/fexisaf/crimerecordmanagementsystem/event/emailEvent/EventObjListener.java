@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@Slf4j
 public class EventObjListener implements ApplicationListener<EventObj> {
 
 
@@ -28,7 +27,6 @@ public class EventObjListener implements ApplicationListener<EventObj> {
         System.out.println(msg);
         try {
             authentication.sendEmail(user,"Email Verification",msg);
-            log.info("email sent to {} with: {}", user,url);
         } catch (
     MessagingException e) {
             throw new RuntimeException(e);
