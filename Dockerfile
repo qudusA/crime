@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jdk-alpine
 VOLUME /tmp
 COPY target/CrimeRecordManagementSystem-0.0.1-SNAPSHOT.jar CrimeRecordManagementSystem-0.0.1-SNAPSHOT.jar
 ENTRYPOINT ["java","-jar","CrimeRecordManagementSystem-0.0.1-SNAPSHOT.jar"]
-EXPOSE 9090
+EXPOSE 8080
 
 
 #FROM maven:3.8.4-openjdk-17 AS build
