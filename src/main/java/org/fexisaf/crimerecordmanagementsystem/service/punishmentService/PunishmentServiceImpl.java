@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.fexisaf.crimerecordmanagementsystem.entity.*;
 import org.fexisaf.crimerecordmanagementsystem.model.PunishmentModel;
 import org.fexisaf.crimerecordmanagementsystem.repository.AssignCaseToCourtRepository;
+import org.fexisaf.crimerecordmanagementsystem.repository.CaseRepository;
 import org.fexisaf.crimerecordmanagementsystem.repository.CourtRepository;
 import org.fexisaf.crimerecordmanagementsystem.repository.PunishmentRepository;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
@@ -11,6 +12,7 @@ import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ public class PunishmentServiceImpl implements PunishmentService{
     private final CourtRepository courtRepository;
 
     @Override
+    @Transactional
     public Ok<?> savePunishment(PunishmentModel punishmentModel,
                                 Long chargedCaseId) throws Exception {
        try {
@@ -86,6 +89,8 @@ public class PunishmentServiceImpl implements PunishmentService{
            }
 
            punishmentRepository.save(punishmentEntity);
+           chargedCase.getCaseEntity().getCaseEntity().setCaseStatus("closed");
+           assignCaseToCourtRepository.save(chargedCase);
            return Ok.builder()
                    .date(LocalDateTime.now())
                    .statusCode(HttpStatus.CREATED.value())
@@ -115,6 +120,7 @@ public class PunishmentServiceImpl implements PunishmentService{
 
 
     @Override
+    @Transactional
     public Ok<?> deleteById(Long punishmentId) throws Exception {
         try {
 
@@ -139,6 +145,7 @@ public class PunishmentServiceImpl implements PunishmentService{
     }
 
     @Override
+    @Transactional
     public Ok<?> updateById(PunishmentModel punishmentModel, Long punishmentId) throws Exception {
         if(punishmentModel == null)throw new IllegalArgumentException("punishment field cannot be empty...");
         PunishmentEntity foundPunishment = punishmentRepository.findById(punishmentId)

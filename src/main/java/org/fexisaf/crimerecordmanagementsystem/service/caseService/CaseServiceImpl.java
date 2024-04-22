@@ -11,7 +11,7 @@ import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Import Transactional annotation
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +39,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
+    @Transactional
     public Ok<?> saveComplaintToCaseByUser(Long complaintId) throws NotFoundException {
 
        ComplainEntity complain = complaintRepository.findById(complaintId)

@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"caseEntities", "suspectId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"date_of_birth", "first_name","last_name"}))
 public class SuspectEntity {
 
 
@@ -25,7 +25,10 @@ public class SuspectEntity {
     private Long suspectId;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "suspect_case", joinColumns = @JoinColumn(name = "suspect_id"),
+    @JoinTable(name = "suspect_case",
+            uniqueConstraints =
+            @UniqueConstraint(columnNames = {"caseEntities","suspectId"})
+            ,joinColumns = @JoinColumn(name = "suspect_id"),
     inverseJoinColumns = @JoinColumn(name = "case_id")
     )
     private List<CaseEntity> caseEntities;

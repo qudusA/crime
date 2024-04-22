@@ -10,9 +10,9 @@ import org.springframework.security.core.Authentication;
 public interface CourtService {
     Ok<?> createCourtHouse(ListOfCourtHouseModel courtHouseModel);
 
-    Ok<?> createCourtRoom(ListOfCourtRoomsEntity listOfCourtRooms);
+    Ok<?> createCourtRoom(ListOfCourtRoomsEntity listOfCourtRooms, Long courtHouseId) throws NotFoundException;
 
-    Ok<?> createOccupation(String email, String courtHouse, Role occupation, Authentication connectedUser, Long roomId) throws NotFoundException;
+    Ok<?> createOccupation(String email, Role occupation, Authentication connectedUser, Long roomId) throws NotFoundException;
 
     Ok<?> findAllCourtHouse();
 

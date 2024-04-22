@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -93,6 +94,7 @@ public class PoliceServiceImpl implements PoliceService {
 
 
     @Override
+    @Transactional
     public Ok<?> createPoliceRank(PoliceRanksEntity rank) throws Exception {
         try {
 
@@ -114,7 +116,7 @@ public class PoliceServiceImpl implements PoliceService {
 
 
     @Override
-    @Transactional(rollbackFor = RuntimeException.class)
+    @Transactional
     public Ok<?> createOccupation(String email, String rank,
                                   String station, Role occupation,
                                   Authentication connectedUser, Long deptId) throws NotFoundException {
@@ -163,6 +165,7 @@ public class PoliceServiceImpl implements PoliceService {
     }
 
     @Override
+    @Transactional
     public Ok<?> createPoliceDepartment(
             ListOfDepartmentModel departmentEntity) throws Exception {
 try {
@@ -183,6 +186,7 @@ try {
     }
 
     @Override
+    @Transactional
     public Ok<?> updateDepartment(
             ListOfDepartmentModel departmentEntity,
             Long deptId) throws Exception {
@@ -207,6 +211,7 @@ try {
     }
 
     @Override
+    @Transactional
     public Ok<?> appointHeadOfDepartment(Long userId, Long deptId) throws Exception {
         var dept = departmentRepository.findById(deptId)
                 .orElseThrow(()-> new NotFoundException("department not found..."));
@@ -239,22 +244,42 @@ try {
     }
 
     @Override
+    @Transactional
     public Ok<?> createSuspect(Long caseId, SuspectEntity suspectEntity) throws Exception {
+        try {
        var case1 = caseRepository.findById(caseId)
                .orElseThrow(()-> new NotFoundException("case not found..."));
        List<CaseEntity> caseEntityList = List.of(case1);
-       SuspectEntity suspectEntity1 = SuspectEntity.builder()
-               .address(suspectEntity.getAddress())
-               .dateOfBirth(suspectEntity.getDateOfBirth())
-               .firstName(suspectEntity.getFirstName())
-               .lastName(suspectEntity.getLastName())
-               .phoneNumber(suspectEntity.getPhoneNumber())
-               .caseEntities(caseEntityList)
-               .build();
-       try {
+      var suspectEntity2 = suspectRepository.findSuspectEntitiesByDateOfBirthAndFirstNameAndLastName(suspectEntity.getDateOfBirth(),
+               suspectEntity.getFirstName(), suspectEntity.getLastName());
+        SuspectEntity suspectEntity1 = null;
 
+      if(suspectEntity2.isEmpty()) {
+            suspectEntity1 = SuspectEntity.builder()
+                   .address(suspectEntity.getAddress())
+                   .dateOfBirth(suspectEntity.getDateOfBirth())
+                   .firstName(suspectEntity.getFirstName())
+                   .lastName(suspectEntity.getLastName())
+                   .phoneNumber(suspectEntity.getPhoneNumber())
+                   .caseEntities(caseEntityList)
+                   .build();
+          suspectRepository.save(suspectEntity1);
+       }else {
+          SuspectEntity existingSuspect = suspectEntity2.get();
+          if (existingSuspect.getCaseEntities().contains(case1)) {
+              return Ok.builder()
+                      .statusCode(HttpStatus.BAD_REQUEST.value())
+                      .statusName(HttpStatus.BAD_REQUEST.name())
+                      .date(LocalDateTime.now())
+                      .message("case already opened...")
+                      .build();
+          }
 
-           suspectRepository.save(suspectEntity1);
+          existingSuspect.getCaseEntities().add(case1);
+          suspectRepository.save(existingSuspect);
+
+      }
+
            return Ok.builder()
                    .statusCode(HttpStatus.CREATED.value())
                    .statusName(HttpStatus.CREATED.name())

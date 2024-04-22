@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class ListOfCourtHouseEntity {
 
     @Id
@@ -24,6 +23,12 @@ public class ListOfCourtHouseEntity {
     @ToString.Exclude
     @OneToMany(mappedBy = "listOfCourtHouses", orphanRemoval = true)
     private List<PoliceWardenJudgeEntity> policeWardenJudgeEntities;
+
+    @OneToMany(mappedBy = "listOfCourtHouseEntity")
+    private List<ListOfCourtRoomsEntity> listOfCourtRooms;
+
+    @OneToMany(mappedBy = "listOfCourtHouseEntity", orphanRemoval = true)
+    private List<ChargedCaseEntity> chargedCaseEntity;
 
     @Column(name = "court_house_name", unique = true)
     private String courtHouseName;

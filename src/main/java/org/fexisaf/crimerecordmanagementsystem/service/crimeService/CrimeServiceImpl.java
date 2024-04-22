@@ -44,7 +44,7 @@ public class CrimeServiceImpl implements CrimeService {
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public Ok<?> reportCrime(CrimeModel crimeModel,
                              MultipartFile imgFile, MultipartFile videoFile) throws IOException {
 
@@ -101,6 +101,7 @@ UserEntity foundUser = investigator.findByEmail(contextUser.getEmail()).orElseTh
                 .crimeDate(crimeModel.getDate())
                 .crimeType(crimeModel.getCrimeType())
                 .investigatingOfficer(foundUser)
+                .status(crimeModel.getStatus())
                 .build();
 
        crimeRepository.save(crimeEntity);
@@ -235,7 +236,7 @@ UserEntity foundUser = investigator.findByEmail(contextUser.getEmail()).orElseTh
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public Ok<?> deleteById(Long crimeId) {
             try {
                 s3Utility.deleteUtil(crimeId, crimeRepository);
@@ -256,7 +257,7 @@ UserEntity foundUser = investigator.findByEmail(contextUser.getEmail()).orElseTh
 
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public Ok<?> updateById(CrimeModel crimeModel, Long crimeId,
                             MultipartFile imgFile, MultipartFile videoFile) throws IOException {
 

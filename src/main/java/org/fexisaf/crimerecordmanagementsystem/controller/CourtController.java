@@ -38,21 +38,21 @@ public class CourtController {
     }
 
     @PreAuthorize("hasAuthority('admin:create')")
-    @PostMapping("/create-court-room")
-    public ResponseEntity<?> createPoliceRanks(@RequestBody @Valid ListOfCourtRoomsEntity listOfCourtRooms) {
-        Ok<?> res = courtService.createCourtRoom(listOfCourtRooms);
+    @PostMapping("/create-court-room/{courtHouseId}")
+    public ResponseEntity<?> createPoliceRanks(@RequestBody @Valid ListOfCourtRoomsEntity listOfCourtRooms
+                                                ,@PathVariable("courtHouseId") Long courtHouseId) throws NotFoundException {
+        Ok<?> res = courtService.createCourtRoom(listOfCourtRooms,courtHouseId );
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
     @PreAuthorize("hasAuthority('admin:create')")
     @PostMapping("/create-occupation/{roomId}")
     public ResponseEntity<?> createOccupation(@RequestParam("email") String email,
-                                              @RequestParam("courtHouse") String courtHouse,
                                               @RequestParam("occupation") Role occupation,
                                               Authentication connectedUser,
                                               @PathVariable Long roomId
                                               ) throws NotFoundException, NotFoundException {
-        Ok<?> res = courtService.createOccupation(email, courtHouse, occupation, connectedUser, roomId);
+        Ok<?> res = courtService.createOccupation(email, occupation, connectedUser, roomId);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -69,7 +69,7 @@ public class CourtController {
 // TODO assign case to judge
 
     @PostMapping("/assign-case-to-judge/{roomId}/{caseId}")
-    @PreAuthorize("hasAnyAuthority('create:read','judge:create')")
+    @PreAuthorize("hasAnyAuthority('admin:create','judge:create')")
     public ResponseEntity<?> assignCaseToJudge(@PathVariable Long roomId,
                                                @PathVariable Long caseId) throws NotFoundException {
         Ok<?> res = courtService.assignCaseToJudge(roomId, caseId);

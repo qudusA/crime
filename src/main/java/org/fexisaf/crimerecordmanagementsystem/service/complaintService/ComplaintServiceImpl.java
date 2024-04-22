@@ -9,6 +9,7 @@ import org.fexisaf.crimerecordmanagementsystem.repository.ComplaintRepository;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class ComplaintServiceImpl implements ComplaintService {
 
 
     @Override
+    @Transactional
     public Ok<?> makeComplaint(ComplaintModel complaintModel) {
 
         ComplainEntity complaint = ComplainEntity.builder()
@@ -92,6 +94,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    @Transactional
     public void save(ComplainEntity complaint) {
         complaintRepository.save(complaint);
     }

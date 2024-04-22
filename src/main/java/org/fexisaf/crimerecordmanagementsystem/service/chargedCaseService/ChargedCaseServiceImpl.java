@@ -1,10 +1,7 @@
 package org.fexisaf.crimerecordmanagementsystem.service.chargedCaseService;
 
 import lombok.RequiredArgsConstructor;
-import org.fexisaf.crimerecordmanagementsystem.entity.ChargedCaseEntity;
-import org.fexisaf.crimerecordmanagementsystem.entity.PoliceWardenJudgeEntity;
-import org.fexisaf.crimerecordmanagementsystem.entity.Role;
-import org.fexisaf.crimerecordmanagementsystem.entity.UserEntity;
+import org.fexisaf.crimerecordmanagementsystem.entity.*;
 import org.fexisaf.crimerecordmanagementsystem.event.chargedCaseEvent.ChargedCaseEvent;
 import org.fexisaf.crimerecordmanagementsystem.repository.*;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
@@ -12,6 +9,7 @@ import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,9 +61,10 @@ public class ChargedCaseServiceImpl implements ChargedCaseService{
 
 
     @Override
+    @Transactional
     public Ok<?> createChargedCase(Long caseId, String courtHouse) throws NotFoundException {
 
-        var foundCase = caseRepository.findById(caseId)
+        CaseEntity foundCase = caseRepository.findById(caseId)
                 .orElseThrow(()-> new NotFoundException("case not found..."));
 
         var foundCourtHouse = listOfCourtHouseRepository.findByCourtHouseName(courtHouse)
@@ -78,8 +77,9 @@ public class ChargedCaseServiceImpl implements ChargedCaseService{
 
         ChargedCaseEntity chargedCaseEntity = chargedCaseRepository.save(caseEntity);
 
-        publisher.publishEvent(new ChargedCaseEvent(chargedCaseEntity));
-
+//        publisher.publishEvent(new ChargedCaseEvent(chargedCaseEntity));
+        foundCase.setCaseStatus("in court");
+        caseRepository.save(foundCase);
         return Ok.builder()
                 .date(LocalDateTime.now())
                 .statusName(HttpStatus.CREATED.name())

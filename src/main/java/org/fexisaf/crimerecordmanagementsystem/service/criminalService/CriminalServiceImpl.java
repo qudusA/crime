@@ -17,6 +17,7 @@ import org.fexisaf.crimerecordmanagementsystem.util.S3Utility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class CriminalServiceImpl implements CriminalService{
     private final S3Utility s3Utility;
 
     @Override
+    @Transactional
     public Ok<?> saveCriminal(CriminalModel criminalModel, Long crimeId, MultipartFile imgFile) throws IOException {
         try {
             if(criminalModel == null) throw new IllegalArgumentException("empty data is not accepted..");
@@ -182,6 +184,7 @@ public class CriminalServiceImpl implements CriminalService{
     }
 
     @Override
+    @Transactional
     public Ok<?> deleteById(Long criminalId) throws NotFoundException,
             org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException {
 
@@ -196,6 +199,7 @@ public class CriminalServiceImpl implements CriminalService{
 
 //    Todo redundant remove it.
     @Override
+    @Transactional
     public Ok<?> deleteByCriminalName(String email) {
         criminalRepository.deleteByEmail(email);
 
@@ -209,6 +213,7 @@ public class CriminalServiceImpl implements CriminalService{
     }
 
     @Override
+    @Transactional
     public Ok<?> updateById(CriminalModel criminalModel, Long criminalId,
                             MultipartFile imgFile) throws IOException {
 

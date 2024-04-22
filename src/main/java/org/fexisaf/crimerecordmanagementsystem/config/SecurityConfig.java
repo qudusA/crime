@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -29,7 +30,7 @@ import java.util.Objects;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-//@EnableMethodSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private static final String[] WHITE_LIST =
@@ -37,7 +38,8 @@ public class SecurityConfig {
                     "/signup",
                     "/verification",
                     "/forgetpassword",
-                    "/forgetpassword/inputOtp"
+                    "/forgetpassword/inputOtp",
+                    "/"
             };
     private final JwtFilter jwtFilter;
     private final TokenRepository tokenRepository;

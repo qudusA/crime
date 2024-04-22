@@ -70,6 +70,7 @@ public class ChangeDataServiceImpl implements ChangeDataService {
 
     //TODO send sms to user as well
     @Override
+    @Transactional
     public Ok<?> changePassword(ChangePasswordModel passwordModel) {
         UserEntity userEntity = (UserEntity) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
@@ -89,7 +90,7 @@ public class ChangeDataServiceImpl implements ChangeDataService {
     }
 
     //    TODO exception handling the transactional did not work
-    @Transactional(rollbackFor = ApiException.class)
+    @Transactional
     @Override
     public Ok<?> sendOTP(ChangePasswordModel pass) throws NotFoundException {
         try {
@@ -117,6 +118,7 @@ public class ChangeDataServiceImpl implements ChangeDataService {
     }
 
     @Override
+    @Transactional
     public Ok<?> changeUserRole(Role role, String email) throws NotFoundException {
 
        var user = userRepository.findByEmail(email)

@@ -14,14 +14,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"room_number", "court_house_id"}))
 public class ListOfCourtRoomsEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
-    @Column(name = "room_number", unique = true)
+    @Column(name = "room_number")
     private String roomNumber;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "court_House_id")
+    private ListOfCourtHouseEntity listOfCourtHouseEntity;
 
 
     @OneToMany(mappedBy = "courtRoomId", orphanRemoval = true)

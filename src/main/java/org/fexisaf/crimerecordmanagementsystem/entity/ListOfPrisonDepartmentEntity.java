@@ -1,6 +1,8 @@
 package org.fexisaf.crimerecordmanagementsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -17,7 +19,9 @@ public class ListOfPrisonDepartmentEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "department")
+    @Column(name = "department", unique = true)
+    @NotNull(message = "department field cannot be null")
+    @NotBlank(message = "department field cannot be blank")
     private String department;
 
     @OneToMany(mappedBy = "department", orphanRemoval = true)

@@ -7,6 +7,7 @@ import org.fexisaf.crimerecordmanagementsystem.repository.OpenCaseOnMatchReposit
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class OpenCaseOnMatchServiceImpl implements OpenCaseOnMatchService{
 
 
     @Override
+    @Transactional
     public Ok<?> saveData(OpenCaseOnMatch onMatch) {
 
 //                // Create an ArrayList to store complaints

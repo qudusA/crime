@@ -54,12 +54,11 @@ public class PrisonServiceImpl implements PrisonService{
 
 
             listOfPrisonFacility.save(prisonFacility);
+            var rank = prisonWardenRankRepository.findByRank("Controller of Corrections").orElseThrow(()-> new NotFoundException("prison rank not found..."));
+            var dept = listOfPrisonDepartmentRepository.findByDepartment("Operations Department").orElseThrow();
 
-            var rank = prisonWardenRankRepository.findByRank("Superintendent of Prison").orElseThrow(()-> new NotFoundException("prison rank not found..."));
-//            var dept = listOfPrisonDepartmentRepository.findByDepartment("Operations department").orElseThrow();
-
-            warden(rank.getRank(), prisonFacility.getPrisonFacilityName(), foundUser,null);
-
+            warden(rank.getRank(), prisonFacility.getPrisonFacilityName(), foundUser,dept.getId());
+            appointHeadOfPrisonDepartment(userId, dept.getId());
             return Ok.builder()
                 .message("prison facility creation successfully...")
                 .statusName(HttpStatus.CREATED.name())
@@ -75,6 +74,7 @@ public class PrisonServiceImpl implements PrisonService{
     }
 
     @Override
+    @Transactional
     public Ok<?> createWardenRank(WardenRanksEntity rank) {
         WardenRanksEntity wardenRanks = WardenRanksEntity.builder()
                 .rank(rank.getRank())
@@ -89,7 +89,7 @@ public class PrisonServiceImpl implements PrisonService{
     }
 
     @Override
-    @Transactional(rollbackFor = RuntimeException.class)
+    @Transactional
     public Ok<?> createOccupation(String email, String rank,
                                   String station, Role occupation,
                                   Authentication connectedUser, Long deptId) throws NotFoundException {
@@ -139,6 +139,7 @@ public class PrisonServiceImpl implements PrisonService{
     }
 
     @Override
+    @Transactional
     public Ok<?> createPrisonDepartment(ListOfDepartmentModel departmentEntity) {
         var department = ListOfPrisonDepartmentEntity.builder()
                 .department(departmentEntity.getDepartment())
@@ -154,6 +155,7 @@ public class PrisonServiceImpl implements PrisonService{
     }
 
     @Override
+    @Transactional
     public Ok<?> updatePrisonDepartment(ListOfDepartmentModel departmentEntity,
                                         Long deptId) throws NotFoundException {
         var dept = listOfPrisonDepartmentRepository.findById(deptId)
@@ -173,6 +175,7 @@ public class PrisonServiceImpl implements PrisonService{
     }
 
     @Override
+    @Transactional
     public Ok<?> appointHeadOfPrisonDepartment(Long userId, Long deptId) throws NotFoundException {
         var prisonDept = listOfPrisonDepartmentRepository.findById(deptId)
                 .orElseThrow(()-> new NotFoundException("department not found..."));
@@ -207,11 +210,10 @@ public class PrisonServiceImpl implements PrisonService{
         var foundFacility = listOfPrisonFacility.findByPrisonFacilityName(station)
                 .orElseThrow(() -> new NotFoundException("prison facility not found..."));
         ListOfPrisonDepartmentEntity department = null;
-        if(deptId != null) {
             department = listOfPrisonDepartmentRepository.findById(deptId)
                     .orElseThrow(() -> new NotFoundException("department not found..."));
-        }
-        var currentCapacity = foundFacility.getCurrentInmateCapacity() + 1;
+
+        var currentCapacity = foundFacility.getCurrentStaffCapacity() + 1;
         if (currentCapacity > 100)
             throw new IllegalArgumentException("the station has reached it max staff capacity");
         foundFacility.setCurrentStaffCapacity(currentCapacity);

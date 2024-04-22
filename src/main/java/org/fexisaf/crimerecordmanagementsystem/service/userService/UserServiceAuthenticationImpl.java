@@ -61,7 +61,7 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
 
 
     @Override
-//    @Transactional
+    @Transactional
     public Ok<?> signUp(SignUpModel signUpModel, HttpServletRequest request) {
         try {
                 Authentication authentication = SecurityContextHolder.getContext()
@@ -96,7 +96,7 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
                     .build();
             var userRes = userRepository.save(user);
             System.out.println(userRes);
-            var tokenEntity =  getTokenEntity(user);
+            var tokenEntity =  getTokenEntity(user, 10L);
             tokenRepository.save(tokenEntity);
 
             publisher.publishEvent(new EventObj(tokenEntity, getServer(request)));
@@ -144,7 +144,7 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
                     .userEntity(user)
                     .token(jwtToken)
                     .isExpired(false)
-                    .expirationTime(LocalDateTime.now().plusHours(1))
+                    .expirationTime(LocalDateTime.now().plusMinutes(60))
                     .build();
             tokenRepository.save(tokenEntity);
             return Ok.builder()
@@ -229,11 +229,11 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
         if (userEmail != null) {
             var user = this.userRepository.findByEmail(userEmail)
                     .orElseThrow();
-            if (jwtService.isTokenExpired(user,refreshToken )) {
+            if (jwtService.isTokenExpired(user,refreshToken)) {
                 var accessToken = jwtService.generateToken(user);
                 var listOfToken = tokenRepository.findAllById(user.getId());
                 listOfToken.forEach(e -> e.setExpired(true));
-                var tok =  getTokenEntity(user);
+                var tok =  getTokenEntity(user, 60L);
                 tokenRepository.save(tok);
                 var authResponse = TokenModel.builder()
                         .accessToken(accessToken)
@@ -269,12 +269,11 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
 
 
 
-    private TokenEntity getTokenEntity(UserEntity user) {
+    private TokenEntity getTokenEntity(UserEntity user, Long minutes) {
         var token = jwtService.generateSingUpToken(user);
-//        var refreshToken = jwtService.generateRefreshToken(user);
         return TokenEntity.builder()
                 .token(token)
-                .expirationTime(LocalDateTime.now().plusMinutes(60))
+                .expirationTime(LocalDateTime.now().plusMinutes(minutes))
                 .userEntity(user)
                 .build();
 

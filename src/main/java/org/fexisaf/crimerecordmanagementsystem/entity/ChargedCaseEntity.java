@@ -1,10 +1,8 @@
 package org.fexisaf.crimerecordmanagementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -13,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"case_id","court_house_id"}))
 public class ChargedCaseEntity {
 
 
@@ -24,7 +23,9 @@ public class ChargedCaseEntity {
     @JoinColumn(name = "case_id")
     private CaseEntity caseEntity;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "court_house_id")
     private ListOfCourtHouseEntity listOfCourtHouseEntity;
 

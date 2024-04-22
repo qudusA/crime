@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +27,16 @@ public class AuthenticationController {
                                      HttpServletRequest request) {
         Ok<?> res = authService.signUp(signUpModel, request);
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<?> home(){
+
+        Map<String, String> map = new HashMap<>();
+        map.put("author", "OLANREWAJU QUDUS ABIODUN");
+        map.put("message","connected successful");
+
+        return ResponseEntity.ok(map);
     }
 
     @PostMapping("/login")

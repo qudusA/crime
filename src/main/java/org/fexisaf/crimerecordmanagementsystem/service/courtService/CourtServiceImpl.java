@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,7 @@ public class CourtServiceImpl implements CourtService{
 
 
     @Override
+    @Transactional
     public Ok<?> createCourtHouse(ListOfCourtHouseModel courtHouseModel) {
 
         var courtHouse = ListOfCourtHouseEntity.builder()
@@ -48,12 +50,18 @@ public class CourtServiceImpl implements CourtService{
     }
 
     @Override
-    public Ok<?> createCourtRoom(ListOfCourtRoomsEntity listOfCourtRooms) {
-       var courtRooms = ListOfCourtRoomsEntity.builder()
+    @Transactional
+    public Ok<?> createCourtRoom(ListOfCourtRoomsEntity listOfCourtRooms, Long courtHouseId) throws NotFoundException {
+
+        var courtHouse = listOfCourtHouseRepository.findById(courtHouseId).orElseThrow();
+
+        var courtRooms = ListOfCourtRoomsEntity.builder()
                .roomNumber(listOfCourtRooms.getRoomNumber())
+               .listOfCourtHouseEntity(courtHouse)
                .build();
 
-       listOfCourtRoomsRepository.save(courtRooms);
+        listOfCourtRoomsRepository.save(courtRooms);
+        judge(courtHouse);
         return Ok.builder()
                 .message("court house created...")
                 .statusName(HttpStatus.CREATED.name())
@@ -63,7 +71,8 @@ public class CourtServiceImpl implements CourtService{
     }
 
     @Override
-    public Ok<?> createOccupation(String email, String courtHouse,
+    @Transactional
+    public Ok<?> createOccupation(String email,
                                   Role occupation, Authentication connectedUser,
                                   Long roomId) throws NotFoundException {
 
@@ -73,7 +82,15 @@ public class CourtServiceImpl implements CourtService{
                     occupation);
 
             if (Objects.requireNonNull(savedUser.getRole()) == Role.JUDGE) {
-                judge( courtHouse, savedUser, roomId);
+                var foundRoom = listOfCourtRoomsRepository.findByRoomId(roomId)
+                        .orElseThrow(() -> new NotFoundException("court room not found"));
+//
+                var policeWardenJudge = PoliceWardenJudgeEntity.builder()
+                        .userEntity(savedUser)
+                        .courtRoomId(foundRoom)
+                        .listOfCourtHouses(foundRoom.getListOfCourtHouseEntity())
+                        .build();
+                courtRepository.save(policeWardenJudge);
 
             } else {
                 throw new NotFoundException("invalid entry");
@@ -105,19 +122,22 @@ public class CourtServiceImpl implements CourtService{
     }
 
     @Override
+    @Transactional
     public Ok<?> assignCaseToJudge(Long roomId, Long caseId) throws NotFoundException {
 
         UserEntity user =(UserEntity) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        if(user.getRole() != Role.JUDGE)
-            throw new IllegalArgumentException("you cant perform this action...");
+//        if(user.getRole() != Role.JUDGE)
+//            throw new IllegalArgumentException("you cant perform this action...");
        var courtRoom = listOfCourtRoomsRepository.findById(roomId)
                 .orElseThrow(()-> new NotFoundException("room not found..."));
 
         var chargedCase = chargedCaseRepository.findById(caseId)
                 .orElseThrow(()-> new NotFoundException("case not found..."));
+    if(!courtRoom.getListOfCourtHouseEntity().getId()
+            .equals(chargedCase.getListOfCourtHouseEntity().getId()))throw new IllegalArgumentException("assigned to wrong court");
 
-        var caseAssigned = CaseAssignedToJudge.builder()
+    var caseAssigned = CaseAssignedToJudge.builder()
                 .caseEntity(chargedCase)
                 .RoomId(courtRoom)
                 .build();
@@ -132,21 +152,13 @@ public class CourtServiceImpl implements CourtService{
     }
 
 
-    private void judge(String courtHouse, UserEntity user, Long roomId) throws NotFoundException {
-        var foundRoom = listOfCourtRoomsRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new NotFoundException("court room not found"));
-        var foundCourtHouse = listOfCourtHouseRepository.findByCourtHouseName(courtHouse)
-                .orElseThrow(() -> new NotFoundException("court house station not found..."));
-        var incrementResult = foundCourtHouse.getNumbersOfCourtRooms() + 1;
-        var policeWardenJudge = PoliceWardenJudgeEntity.builder()
-                .userEntity(user)
-                .courtRoomId(foundRoom)
-                .listOfCourtHouses(foundCourtHouse)
-                .build();
+    private void judge(ListOfCourtHouseEntity courtHouse) throws NotFoundException {
 
-        foundCourtHouse.setNumbersOfCourtRooms(incrementResult);
-        listOfCourtHouseRepository.save(foundCourtHouse);
-        courtRepository.save(policeWardenJudge);
+        var incrementResult = courtHouse.getNumbersOfCourtRooms() + 1;
+
+        courtHouse.setNumbersOfCourtRooms(incrementResult);
+        listOfCourtHouseRepository.save(courtHouse);
+
     }
 
 
