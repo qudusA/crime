@@ -1,9 +1,11 @@
 package org.fexisaf.crimerecordmanagementsystem.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.fexisaf.crimerecordmanagementsystem.entity.Role;
 import org.fexisaf.crimerecordmanagementsystem.model.ChangePasswordModel;
+import org.fexisaf.crimerecordmanagementsystem.model.ForgetPasswordModel;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
 import org.fexisaf.crimerecordmanagementsystem.response.ok.Ok;
 import org.fexisaf.crimerecordmanagementsystem.service.changeDataService.ChangeDataService;
@@ -16,13 +18,14 @@ import org.springframework.web.bind.annotation.*;
 public class ChangeDataController {
     private final ChangeDataService changeDatService;
 
-    @PutMapping("/forget-password")
-    public ResponseEntity<?> forgetPassWord(@RequestBody @Valid ChangePasswordModel pass) throws NotFoundException {
-        Ok<?> res = changeDatService.sendOTP(pass);
+    @PutMapping("/forgetpassword")
+    public ResponseEntity<?> forgetPassWord(@RequestBody @Valid ForgetPasswordModel pass
+                                            , HttpServletRequest request) throws NotFoundException {
+        Ok<?> res = changeDatService.sendOTP(pass, request);
         return ResponseEntity.ok(res);
     }
 
-    @PutMapping("/forget-password/inputOtp")
+    @PutMapping("/forgetpassword/inputOtp")
     public ResponseEntity<?> forget(@RequestParam("pass") String password,
                                     @RequestParam("email") String email,
                                     @RequestParam("otp") String otp) throws NotFoundException {
@@ -30,7 +33,7 @@ public class ChangeDataController {
         return ResponseEntity.ok(res);
     }
 
-    @PutMapping("/change-password")
+    @PutMapping("/changepassword")
     public ResponseEntity<?> changePassword(@RequestBody @Valid
                                             ChangePasswordModel passwordModel){
         Ok<?> res = changeDatService.changePassword(passwordModel);

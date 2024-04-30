@@ -5,12 +5,15 @@ import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.type.PhoneNumber;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.fexisaf.crimerecordmanagementsystem.config.SmsConfig;
 import org.fexisaf.crimerecordmanagementsystem.entity.Role;
 import org.fexisaf.crimerecordmanagementsystem.entity.TokenEntity;
 import org.fexisaf.crimerecordmanagementsystem.entity.UserEntity;
 import org.fexisaf.crimerecordmanagementsystem.model.ChangePasswordModel;
+import org.fexisaf.crimerecordmanagementsystem.model.ForgetPasswordModel;
 import org.fexisaf.crimerecordmanagementsystem.repository.TokenRepository;
 import org.fexisaf.crimerecordmanagementsystem.repository.UserRepository;
 import org.fexisaf.crimerecordmanagementsystem.response.error.NotFoundException;
@@ -20,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -71,15 +75,24 @@ public class ChangeDataServiceImpl implements ChangeDataService {
     //TODO send sms to user as well
     @Override
     @Transactional
-    public Ok<?> changePassword(ChangePasswordModel passwordModel) {
+    public Ok<?> changePassword(@Valid @RequestBody ChangePasswordModel passwordModel) {
         UserEntity userEntity = (UserEntity) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
 
-        String encryptPassword = passwordEncoder.encode(passwordModel.getPassword());
-        if(encryptPassword.matches(userEntity.getPassword())) {
-            userEntity.setPassword(passwordEncoder.encode(passwordModel.getPassword()));
-            userRepository.save(userEntity);
+
+        if (!passwordModel.getPassword().equals(passwordModel.getConfirmPassword())){
+            throw new IllegalStateException("Password are not the same");
         }
+
+        if(!passwordEncoder.matches(passwordModel.getCurrentPassword(), userEntity.getPassword())){
+            throw new IllegalStateException("Wrong password");
+        }
+
+
+
+        userEntity.setPassword(passwordEncoder.encode(passwordModel.getPassword()));
+        userRepository.save(userEntity);
+
 
         return Ok.builder()
                 .message("password successfully changed...")
@@ -92,8 +105,13 @@ public class ChangeDataServiceImpl implements ChangeDataService {
     //    TODO exception handling the transactional did not work
     @Transactional
     @Override
-    public Ok<?> sendOTP(ChangePasswordModel pass) throws NotFoundException {
+    public Ok<?> sendOTP(@Valid @RequestBody ForgetPasswordModel pass, HttpServletRequest request) throws NotFoundException {
         try {
+
+            if (!pass.getPassword().equals(pass.getConfirmPassword())){
+                throw new IllegalStateException("Password are not the same");
+            }
+
             String email = pass.getEmail();
 
             UserEntity userEntity = userRepository.findByEmail(email)
@@ -105,7 +123,7 @@ public class ChangeDataServiceImpl implements ChangeDataService {
 
             return Ok.builder()
                     .message("otp has been sent to the registered number" +
-                            "\nredirect:/forgetpassword/inputOtp?pass=\" + pass.getPassword() + \"&email=\" + pass.getEmail() ")
+                            "redirect:" + getServer(request)+ "/forgetpassword/inputOtp?pass=" + pass.getPassword() + "&email=" + pass.getEmail())
                     .date(LocalDateTime.now())
                     .statusCode(HttpStatus.OK.value())
                     .statusName(HttpStatus.OK.name())
@@ -186,6 +204,12 @@ public class ChangeDataServiceImpl implements ChangeDataService {
 
         tokenRepository.save(tokenEntity);
         return otp;
+    }
+
+    private String getServer(HttpServletRequest request) {
+        return "http://" + request.getServerName()+":"
+                + request.getServerPort()
+                +request.getContextPath();
     }
 
 }

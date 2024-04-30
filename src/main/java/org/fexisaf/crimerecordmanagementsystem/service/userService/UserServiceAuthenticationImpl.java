@@ -96,7 +96,8 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
                     .build();
             var userRes = userRepository.save(user);
             System.out.println(userRes);
-            var tokenEntity =  getTokenEntity(user, 10L);
+            var token = jwtService.generateSingUpToken(user);
+            var tokenEntity =  getTokenEntity(user, 10,token);
             tokenRepository.save(tokenEntity);
 
             publisher.publishEvent(new EventObj(tokenEntity, getServer(request)));
@@ -140,12 +141,7 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
-            var tokenEntity = TokenEntity.builder()
-                    .userEntity(user)
-                    .token(jwtToken)
-                    .isExpired(false)
-                    .expirationTime(LocalDateTime.now().plusMinutes(60))
-                    .build();
+            var tokenEntity = getTokenEntity(user, 60, jwtToken);
             tokenRepository.save(tokenEntity);
             return Ok.builder()
                     .message(token)
@@ -233,7 +229,7 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
                 var accessToken = jwtService.generateToken(user);
                 var listOfToken = tokenRepository.findAllById(user.getId());
                 listOfToken.forEach(e -> e.setExpired(true));
-                var tok =  getTokenEntity(user, 60L);
+                var tok =  getTokenEntity(user, 60, accessToken);
                 tokenRepository.save(tok);
                 var authResponse = TokenModel.builder()
                         .accessToken(accessToken)
@@ -269,8 +265,8 @@ public class UserServiceAuthenticationImpl implements UserServiceAuthentication 
 
 
 
-    private TokenEntity getTokenEntity(UserEntity user, Long minutes) {
-        var token = jwtService.generateSingUpToken(user);
+    private TokenEntity getTokenEntity(UserEntity user, int minutes, String token) {
+
         return TokenEntity.builder()
                 .token(token)
                 .expirationTime(LocalDateTime.now().plusMinutes(minutes))
